@@ -1,21 +1,13 @@
-from djitellopy import Tello
-import time
+from fellbeast.drone import Drone
 
-tello = Tello()
-tello.connect()
+drone = Drone()
+drone.connect(camera=False)
+drone.reset_speed()
 
-tello.for_back_velocity = 0
-tello.left_right_velocity = 0
-tello.up_down_velocity = 0
-tello.yaw_velocity = 0
-tello.speed = 0
-
-print(tello.get_battery())
-
-tello.takeoff()
-time.sleep(8)
-tello.rotate_clockwise(90)
-time.sleep(3)
-tello.move_left(35)
-time.sleep(3)
-tello.land()
+drone.takeoff()
+drone.wait(8)
+drone.rotate_clockwise(90)
+drone.wait(3)
+drone.move_left(35)
+drone.wait(3)
+drone.land()
