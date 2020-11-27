@@ -29,17 +29,38 @@ class Drone(object):
         return self.tello.get_battery()
 
     @staticmethod
-    def wait(t):
-        time.sleep(t)
+    def wait(seconds):
+        time.sleep(seconds)
 
     def takeoff(self):
         self.tello.takeoff()
 
+    def land(self):
+        self.tello.land()
+
     def rotate_clockwise(self, angle):
         self.tello.rotate_clockwise(angle)
 
-    def move_left(self, x):
-        self.tello.move_left(x)
+    def rotate_counter_clockwise(self, angle):
+        self.tello.rotate_counter_clockwise(angle)
 
-    def land(self):
-        self.tello.land()
+    def move_left(self, centimeters):
+        self.tello.move_left(centimeters)
+
+    def move_right(self, centimeters):
+        self.tello.move_right(centimeters)
+
+    def move_back(self, centimeters):
+        self.tello.move_back(centimeters)
+
+    def move_forward(self, centimeters):
+        self.tello.move_forward(centimeters)
+
+    def move_up(self, centimeters):
+        self.tello.move_up(centimeters)
+
+    def move_down(self, centimeters):
+        self.tello.move_down(centimeters)
+
+    def flip_left(self):
+        self.tello.flip_left()
