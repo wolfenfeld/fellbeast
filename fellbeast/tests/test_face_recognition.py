@@ -19,5 +19,7 @@ class FaceRecognitionTestCase(unittest.TestCase):
         print(distance)
         distance = face_recognition.compute_distance(image_1, image_3)
         print(distance)
+
+
 if __name__ == '__main__':
     unittest.main()
