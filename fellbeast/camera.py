@@ -4,4 +4,4 @@ class Camera(object):
         self.width = width
         self.height = height
 
-
+    
