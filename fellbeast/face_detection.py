@@ -15,3 +15,7 @@ class FaceDetector(object):
         for (x, y, w, h) in faces:
             cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
         return image
+
+    def crop_faces(self, image):
+        faces = self.detect(image)
+        return [image[y:y+h, x:x+w] for (x, y, w, h) in faces]

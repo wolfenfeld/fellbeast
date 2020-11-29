@@ -4,6 +4,10 @@ import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 
+# import os
+#
+# os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 
 class FaceRecognition(object):
     model920 = model_920()
