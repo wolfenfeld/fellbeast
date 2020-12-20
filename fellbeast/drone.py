@@ -3,12 +3,14 @@ import time
 from djitellopy import Tello
 
 from fellbeast.camera import Camera
+from fellbeast.face_detection import FaceDetector
+from fellbeast.face_recognition import FaceRecognition
 
 
 class Drone(object):
     def __init__(self):
         self.tello = Tello()
-        self.camera = Camera()
+        self.camera = Camera(self.tello)
 
     def reset_speed(self):
         self.tello.for_back_velocity = 0
