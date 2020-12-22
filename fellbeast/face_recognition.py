@@ -31,6 +31,12 @@ class FaceRecognition(object):
         self.known_faces = self.get_known_faces()
 
     def compute_distance(self, image_1, image_2):
+
+        if not Image.isImageType(image_1):
+            image_1 = Image.fromarray(image_1)
+        if not Image.isImageType(image_2):
+            image_2 = Image.fromarray(image_2)
+
         transformed_image_1 = self.preprocess(image_1).unsqueeze(0)
         transformed_image_2 = self.preprocess(image_2).unsqueeze(0)
         embedded_image_1 = self.model920(transformed_image_1)
