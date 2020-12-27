@@ -7,7 +7,7 @@ class FaceDetector(object):
 
     def detect(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        return self.face_cascade.detectMultiScale(gray, 1.1, 4)
+        return self.face_cascade.detectMultiScale(gray, 1.2, 4)
 
     def trace_faces(self, image):
         faces = self.detect(image)

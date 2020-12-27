@@ -15,10 +15,10 @@ class FaceRecognitionTestCase(unittest.TestCase):
     def test_image_comparison(self):
         image_1 = cv2.imread('./data/yael_1.jpg')
         image_2 = cv2.imread('./data/amit_1.jpg')
-        image_3 = cv2.imread('./data/yael_3.jpg')
+        image_3 = cv2.imread('./data/yael_2.jpg')
 
-        face_recognition = FaceRecognition(1.5)
         face_detector = FaceDetector()
+        face_recognition = FaceRecognition(1.5, './data/', face_detector)
 
         face_image_1 = face_detector.crop_faces(image_1)[0]
         cv2.imshow('yael 1', face_image_1)

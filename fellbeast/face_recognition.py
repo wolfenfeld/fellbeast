@@ -6,11 +6,6 @@ from torchvision import transforms
 import os
 from PIL import Image
 
-# import os
-#
-# os.environ['KMP_DUPLICATE_LIB_OK']='True'
-from fellbeast.face_detection import FaceDetector
-
 
 class FaceRecognition(object):
     model920 = model_920()
@@ -22,10 +17,11 @@ class FaceRecognition(object):
                             transforms.ToTensor(),
                             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                  std=[0.229, 0.224, 0.225])]
-    preprocess = transforms.Compose(preprocess_pipelines)
-    face_detector = FaceDetector()
 
-    def __init__(self, threshold, known_face_path):
+    preprocess = transforms.Compose(preprocess_pipelines)
+
+    def __init__(self, threshold, known_face_path, face_detector):
+        self.face_detector = face_detector
         self.threshold = threshold
         self.known_face_path = known_face_path
         self.known_faces = self.get_known_faces()
@@ -56,12 +52,7 @@ class FaceRecognition(object):
         return [self.match_face_with_known_faces(face) for face in faces]
 
     def match_face_with_known_faces(self, face):
-        best_match_score = -1
-        matched_name = "None"
-        for name, known_face in self.known_faces.items():
-            match_score = self.compute_distance(face, known_face)
-            if match_score > best_match_score:
-                matched_name = name
-                best_match_score = match_score
 
-        return matched_name
+        scores = {name: self.compute_distance(face, known_face) for name, known_face in self.known_faces.items()}
+
+        return min(scores, key=scores.get)

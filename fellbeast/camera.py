@@ -6,8 +6,8 @@ from fellbeast.face_recognition import FaceRecognition
 
 class Camera(object):
 
-    face_recognition = FaceRecognition(0.1, known_face_path='./data/')
     face_detector = FaceDetector()
+    face_recognition = FaceRecognition(0.1, known_face_path='./data/',face_detector=face_detector)
 
     def __init__(self, drone_camera, width=320, height=240):
         self.drone_camera = drone_camera
