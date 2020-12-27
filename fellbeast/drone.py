@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 from djitellopy import Tello
 
@@ -10,6 +11,7 @@ class Drone(object):
     camera_screen_width = 320
     camera_screen_height = 240
     relevant_object_target_size = 20
+    control_clipping_value = 100
 
     def __init__(self):
         self.tello = Tello()
@@ -81,15 +83,19 @@ class Drone(object):
         yaw_control = self.yaw_controller.get_action(input_p=yaw_error,
                                                      input_d=yaw_error - previous_error['yaw'],
                                                      input_i=0)
+        yaw_control = int(np.clip(yaw_control, -self.control_clipping_value, self.control_clipping_value))
 
         up_down_control = self.up_down_controller.get_action(input_p=up_down_error,
                                                              input_d=up_down_error - previous_error['up_down'],
                                                              input_i=0)
+        up_down_control = int(np.clip(up_down_control, -self.control_clipping_value, self.control_clipping_value))
 
         forward_backward_control = self.forward_backward_controller.get_action(
             input_p=forward_backward_error,
             input_d=forward_backward_error - previous_error['forward_backward'],
             input_i=0)
+        forward_backward_control = int(np.clip(forward_backward_control,
+                                               -self.control_clipping_value, self.control_clipping_value))
 
         control_action = {'yaw': yaw_control, 'up_down': up_down_control, 'forward_backward': forward_backward_control}
         error = {'yaw': yaw_error, 'up_down': up_down_error, 'forward_backward': forward_backward_error}
