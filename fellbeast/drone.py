@@ -6,10 +6,13 @@ from djitellopy import Tello
 from fellbeast.camera import Camera
 from fellbeast.controllers import PID
 
+RESET_FREQUENCY = 50
+CHECK_FOR_NEW_FACE_FREQUENCY = 25
+
 
 class Drone(object):
-    camera_screen_width = 320
-    camera_screen_height = 240
+    camera_screen_width = 640
+    camera_screen_height = 480
     relevant_object_target_size = 20
     control_clipping_value = 100
 

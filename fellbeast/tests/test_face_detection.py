@@ -12,7 +12,7 @@ class FaceDetectionTestCase(unittest.TestCase):
 
         face_detector = FaceDetector()
 
-        face_detector.trace_faces(image_1)
+        face_detector.trace_faces(image_1, detection_method='cascade')
         cv2.imshow('img', image_1)
         cv2.waitKey()
         self.assertEqual(True, False)
