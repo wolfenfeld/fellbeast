@@ -25,12 +25,12 @@ class FaceRecognition(object):
                 face_bounding_box = faces_bounding_boxes[0]
 
                 encoded_known_faces[face_file_name] = face_recognition.face_encodings(
-                    image, known_face_locations=[face_bounding_box.css])
+                    image, known_face_locations=[face_bounding_box.css], model='big')
 
         return encoded_known_faces
 
     def find_face_in_encodings(self, image, face_bounding_box):
-        encoded_face = face_recognition.face_encodings(image, known_face_locations=[face_bounding_box.css])
+        encoded_face = face_recognition.face_encodings(image, known_face_locations=[face_bounding_box.css], model='big')
         scores = {name: face_recognition.face_distance([encoded_face[0]], encoded_known_face[0])
                   for name, encoded_known_face in self.encoded_known_faces.items()}
         smallest_distance = min(scores.values())
