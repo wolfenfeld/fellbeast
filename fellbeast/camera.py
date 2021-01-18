@@ -7,13 +7,12 @@ from fellbeast.face_recognition import FaceRecognition
 
 class Camera(object):
 
-    face_detector = FaceDetector()
-    face_recognition = FaceRecognition(known_face_path='./data/', face_detector=face_detector)
-
-    def __init__(self, drone_camera, width=640, height=480):
+    def __init__(self, drone_camera, width=640, height=480, known_face_path='./face_db/'):
         self.drone_camera = drone_camera
         self.width = width
         self.height = height
+        self.face_detector = FaceDetector()
+        self.face_recognition = FaceRecognition(known_face_path=known_face_path, face_detector=self.face_detector)
 
     def read(self):
         if type(self.drone_camera) == Tello:
