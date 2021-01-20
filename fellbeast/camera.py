@@ -16,7 +16,7 @@ class Camera(object):
 
     def read(self):
         if type(self.drone_camera) == Tello:
-            return self.drone_camera.get_frame_read()
+            return self.drone_camera.get_frame_read().frame
         else:
             frame = self.drone_camera.read()[1]
             if frame is None:

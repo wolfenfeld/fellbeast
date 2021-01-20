@@ -16,10 +16,10 @@ class Drone(object):
     relevant_object_target_size = 20
     control_clipping_value = 100
 
-    def __init__(self):
+    def __init__(self, known_face_path):
         self.tello = Tello()
-        self.camera = Camera(self.tello)
-        self.yaw_controller = PID(0.4, 0, 0.4)
+        self.camera = Camera(self.tello, known_face_path=known_face_path)
+        self.yaw_controller = PID(0.2, 0, 0.2)
         self.up_down_controller = PID(0.4, 0, 0.4)
         self.forward_backward_controller = PID(0.4, 0, 0.4)
 

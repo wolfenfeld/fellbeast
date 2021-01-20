@@ -27,17 +27,19 @@ class FaceRecognition(object):
                     face_bounding_box = faces_bounding_boxes[0]
 
                     encoded_known_faces[known_person].append(face_recognition.face_encodings(
-                        image, known_face_locations=[face_bounding_box.css], model='big'))
+                        image, known_face_locations=[face_bounding_box.css]))
 
         return encoded_known_faces
 
     def find_face_in_encodings(self, image, face_bounding_box):
-        encoded_face = face_recognition.face_encodings(image, known_face_locations=[face_bounding_box.css], model='big')
+        encoded_face = face_recognition.face_encodings(image, known_face_locations=[face_bounding_box.css])
+        # Getting the closest image distance for each known person
         scores = {name: min(
             [face_recognition.face_distance([encoded_face[0]], encoded_known_face[0])
              for encoded_known_face in encoded_known_faces])[0]
                   for name, encoded_known_faces in self.encoded_known_faces.items()}
 
+        # Getting the smallest distance
         smallest_distance = min(scores.values())
         if smallest_distance < SMALLEST_DISTANCE_THRESHOLD:
             matched_name = min(scores, key=scores.get)

@@ -36,5 +36,9 @@ class BoundingBox(object):
     def rectangle_coordinates(self):
         return (self.left, self.top), (self.right, self.bottom)
 
+    @property
+    def bounding_box_area(self):
+        return self.width*self.height
+
     def crop_image(self, image):
         return image[self.top:self.bottom, self.left:self.right]

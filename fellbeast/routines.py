@@ -1,67 +1,20 @@
 import cv2
-from fellbeast.configurations import CHECK_FOR_NEW_FACE_FREQUENCY
+from fellbeast.drone import Drone
 from fellbeast.object_tracker import MultipleObjectTracker
-from fellbeast.utils import get_closest_coordinate
 
 
 def track_multiple_faces(camera):
     cv2.namedWindow("detected_face")
     frame_number = 0
-    lost_tracking = True
 
+    faces_tracker = MultipleObjectTracker()
     while True:
         frame = camera.read()
         if frame is None:
             break
-
+        faces_bounding_boxes, names = faces_tracker.track_faces(frame=frame, frame_number=frame_number,
+                                                                camera=camera)
         frame_number += 1
-
-        scan_for_new_faces = frame_number % CHECK_FOR_NEW_FACE_FREQUENCY == 0
-
-        reset_detection = lost_tracking
-        # Initial face detection
-        if reset_detection:
-            # Getting all faces and trying to recognise them
-            faces_bounding_boxes = camera.face_detector.detect(frame, method='deepface')
-
-            # If no faces where detected continuing to the next frame
-            if len(faces_bounding_boxes) == 0:
-                continue
-
-            names = {face_bounding_box.bounding_box_center:
-                     camera.face_recognition.find_face_in_encodings(image=frame, face_bounding_box=face_bounding_box)
-                     for face_bounding_box in faces_bounding_boxes}
-
-            faces_tracker = MultipleObjectTracker()
-            faces_tracker.init(frame, bounding_boxes=faces_bounding_boxes)
-
-            lost_tracking = False
-
-        # Periodic scanning for new faces
-        elif scan_for_new_faces:
-            new_faces_bounding_box = camera.face_detector.detect(frame, method='deepface')
-
-            # If there are new faces setting the lost_tracking indicator to True
-            if len(new_faces_bounding_box) > len(faces_bounding_boxes):
-                lost_tracking = True
-                continue
-
-        # Updating tracker with new frame
-        else:
-            (success, faces_bounding_boxes) = faces_tracker.update_tracker(frame)
-
-            faces_coordinates = [face_bounding_box.bounding_box_center for face_bounding_box in faces_bounding_boxes]
-            old_coordinates = list(names.keys())
-            updated_names = {face_coordinates: names[get_closest_coordinate(face_coordinates, old_coordinates)]
-                             for face_coordinates in faces_coordinates}
-
-            names = updated_names
-
-            if not success:
-                lost_tracking = True
-                continue
-            else:
-                lost_tracking = False
 
         # plotting the bounding boxes
         for face_bounding_box in faces_bounding_boxes:
@@ -73,5 +26,55 @@ def track_multiple_faces(camera):
                                 color=(255, 0, 0), thickness=2)
 
         if cv2.waitKey(1) == 27:
+            break
+        cv2.imshow('detected_face', frame)
+
+
+def follow_person(person, drone: Drone):
+    if person not in drone.camera.face_recognition.encoded_known_faces.keys():
+        raise ValueError('Unknown person')
+
+    previous_error = {'yaw': 0, 'up_down': 0, 'forward_backward': 0}
+    cv2.namedWindow("detected_face")
+    frame_number = 0
+
+    faces_tracker = MultipleObjectTracker()
+    while True:
+        frame = drone.camera.read()
+        if frame is None:
+            break
+        faces_data = faces_tracker.track_faces(frame=frame, frame_number=frame_number, camera=drone.camera)
+        frame_number += 1
+        person_data = [face_data for face_data in faces_data.values()
+                       if face_data['name'] == person]
+        if len(person_data) == 0:
+            continue
+            # add scan room
+
+        else:
+            person_data = person_data[0]
+        object_location = {'x':person_data['bounding_box'].bounding_box_center[1],
+                           'y':person_data['bounding_box'].bounding_box_center[0]}
+        object_size = person_data['bounding_box'].bounding_box_area
+
+        previous_error['up_down'] = 0
+        previous_error['forward_backward'] = 0
+
+        control_action, previous_error = drone.get_control_velocity_action(object_location, object_size, previous_error)
+        drone.update_speed(control_action)
+
+        # plotting the bounding boxes
+        for face_data in faces_data.values():
+            top_left, bottom_right = face_data['bounding_box'].rectangle_coordinates
+            frame = cv2.rectangle(frame, top_left, bottom_right, (255, 0, 0), 2)
+            text = f"{face_data['name']} \n {control_action['yaw']}"
+            frame = cv2.putText(img=frame,
+                                text=text,
+                                org=top_left,
+                                fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
+                                color=(255, 0, 0), thickness=2)
+
+        if cv2.waitKey(1) == 27:
+            drone.land()
             break
         cv2.imshow('detected_face', frame)
