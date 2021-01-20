@@ -13,8 +13,8 @@ class BoundingBox(object):
         else:
             self.bottom = bottom
             self.right = right
-            self.width = right-left
-            self.height = bottom-top
+            self.width = abs(right-left)
+            self.height = abs(bottom-top)
 
     @classmethod
     def from_tracker(cls, left, top, width, height):
@@ -30,7 +30,7 @@ class BoundingBox(object):
 
     @property
     def bounding_box_center(self):
-        return int(self.top+(self.height/2)), int(self.left+(self.width/2))
+        return self.top+int(self.height/2), self.left+int(self.width/2)
 
     @property
     def rectangle_coordinates(self):

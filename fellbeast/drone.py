@@ -18,7 +18,10 @@ class Drone(object):
 
     def __init__(self, known_face_path):
         self.tello = Tello()
-        self.camera = Camera(self.tello, known_face_path=known_face_path)
+        self.camera = Camera(self.tello,
+                             width=self.camera_screen_width,
+                             height=self.camera_screen_height,
+                             known_face_path=known_face_path)
         self.yaw_controller = PID(0.2, 0, 0.2)
         self.up_down_controller = PID(0.4, 0, 0.4)
         self.forward_backward_controller = PID(0.4, 0, 0.4)

@@ -58,16 +58,23 @@ def follow_person(person, drone: Drone):
         object_size = person_data['bounding_box'].bounding_box_area
 
         previous_error['up_down'] = 0
-        previous_error['forward_backward'] = 0
+        # previous_error['forward_backward'] = 0
 
         control_action, previous_error = drone.get_control_velocity_action(object_location, object_size, previous_error)
-        drone.update_speed(control_action)
+        # drone.update_speed(control_action)
 
         # plotting the bounding boxes
         for face_data in faces_data.values():
             top_left, bottom_right = face_data['bounding_box'].rectangle_coordinates
             frame = cv2.rectangle(frame, top_left, bottom_right, (255, 0, 0), 2)
-            text = f"{face_data['name']} \n {control_action['yaw']}"
+            dot_center = face_data['bounding_box'].bounding_box_center
+            frame = cv2.circle(frame,
+                               center=(dot_center[1], dot_center[0]),
+                               radius=5,
+                               color=(0, 255, 0),thickness= -1)
+            text = f"{face_data['name']} /n " \
+                   f"yaw: {control_action['yaw']} /n " \
+                   f"forward_backward: {control_action['forward_backward']}"
             frame = cv2.putText(img=frame,
                                 text=text,
                                 org=top_left,
