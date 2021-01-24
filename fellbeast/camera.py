@@ -16,7 +16,8 @@ class Camera(object):
 
     def read(self):
         if type(self.drone_camera) == Tello:
-            return self.drone_camera.get_frame_read().frame
+            frame = self.drone_camera.get_frame_read().frame
+            return cv2.resize(frame, (self.width, self.height))
         else:
             frame = self.drone_camera.read()[1]
             if frame is None:

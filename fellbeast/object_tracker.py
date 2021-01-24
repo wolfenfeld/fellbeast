@@ -53,7 +53,6 @@ class MultipleObjectTracker(BaseObjectTracker):
     def track_faces(self, frame, frame_number, camera):
 
         scan_for_new_faces = frame_number % CHECK_FOR_NEW_FACE_FREQUENCY == 0
-
         # Initial face detection
         if self.lost_tracking:
             # Getting all faces and trying to recognise them
@@ -78,6 +77,15 @@ class MultipleObjectTracker(BaseObjectTracker):
             # If there are new faces setting the lost_tracking indicator to True
             if len(new_faces_bounding_box) > len(self.bounding_boxes):
                 self.lost_tracking = True
+            # else:
+            #     new_faces_names = list()
+            #     for new_face_bounding_box in new_faces_bounding_box:
+            #         new_faces_names.append(camera.face_recognition.find_face_in_encodings(image=frame,
+            #                                                        face_bounding_box=new_face_bounding_box))
+            #
+            #     if set(new_faces_names) != set([object_data['name'] for object_data in self.objects_data.values()]):
+            #         self.lost_tracking = True
+
 
         # Updating tracker with new frame
         else:

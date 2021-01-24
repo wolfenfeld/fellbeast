@@ -1,5 +1,7 @@
 import time
 import numpy as np
+import logging
+
 
 from djitellopy import Tello
 
@@ -9,34 +11,48 @@ from fellbeast.controllers import PID
 RESET_FREQUENCY = 50
 CHECK_FOR_NEW_FACE_FREQUENCY = 25
 
+logging.root.setLevel(logging.NOTSET)
+logging.basicConfig(level=logging.NOTSET)
+
 
 class Drone(object):
     camera_screen_width = 640
     camera_screen_height = 480
-    relevant_object_target_size = 20
+    relevant_object_target_size = 40000
     control_clipping_value = 100
 
-    def __init__(self, known_face_path):
+    def __init__(self, known_face_path, mode='DEV'):
+        self.logger = logging.getLogger('Drone Logger')
+        self.logger.setLevel(logging.DEBUG)
+        self.mode = mode
+        self.logger.info(f'Initializing drone on {self.mode} mode')
         self.tello = Tello()
+        self.logger.info('Initializing drone camera')
         self.camera = Camera(self.tello,
                              width=self.camera_screen_width,
                              height=self.camera_screen_height,
                              known_face_path=known_face_path)
-        self.yaw_controller = PID(0.2, 0, 0.2)
-        self.up_down_controller = PID(0.4, 0, 0.4)
-        self.forward_backward_controller = PID(0.4, 0, 0.4)
+
+        self.logger.info('Initializing drone controllers')
+        self.yaw_controller = PID(0.3, 0, 0.3)
+        self.up_down_controller = PID(0.2, 0, 0.2)
+        self.forward_backward_controller = PID(0.2, 0, 0.2)
 
     def reset_speed(self):
+        self.logger.info('Resetting speeds')
+
         self.tello.forward_backward_velocity = 0
         self.tello.left_right_velocity = 0
         self.tello.up_down_velocity = 0
         self.tello.yaw_velocity = 0
         self.tello.speed = 0
 
-    def connect(self, camera=False):
+    def connect(self, camera=True):
+        self.logger.info('Connecting to drone')
         self.tello.connect()
-        print(f'Battery level: {self.battery_level}')
+        self.logger.info(f'Battery level: {self.battery_level}')
         if camera:
+            self.logger.info('Closing and opening stream')
             self.tello.streamoff()
             self.tello.streamon()
 
@@ -49,9 +65,21 @@ class Drone(object):
         time.sleep(seconds)
 
     def takeoff(self):
-        self.tello.takeoff()
+        tries = 5
+        current_try = 0
+        while current_try < tries:
+            result = self.tello.takeoff()
+            if result:
+                self.logger.info('Liftoff successful')
+                return True
+            else:
+                self.logger.info(f'Failed liftoff attempt ({current_try})')
+                current_try += 1
+                self.wait(2)
+        return False
 
     def land(self):
+        self.logger.info('Landing drone')
         self.tello.land()
 
     def rotate_clockwise(self, angle):
@@ -82,9 +110,11 @@ class Drone(object):
         self.tello.flip_left()
 
     def get_control_velocity_action(self, object_location, object_size, previous_error):
-        yaw_error = (object_location['x'] - self.camera_screen_width) / 2
+        self.logger.info('Getting control actions')
+        yaw_error = object_location['x'] - self.camera_screen_width / 2
         up_down_error = (object_location['y'] - self.camera_screen_height) / 2
-        forward_backward_error = object_size - self.relevant_object_target_size
+        forward_backward_error = -(object_size - self.relevant_object_target_size)/\
+                                 np.sqrt(self.camera_screen_height * self.camera_screen_width)
 
         yaw_control = self.yaw_controller.get_action(input_p=yaw_error,
                                                      input_d=yaw_error - previous_error['yaw'],
@@ -108,7 +138,9 @@ class Drone(object):
         return control_action, error
 
     def update_speed(self, control_action: dict):
-
+        if self.mode == 'DEBUG':
+            return
+        self.logger.info('Updating drone speed')
         left_right_velocity = self.tello.left_right_velocity
         forward_backward_velocity = control_action.get('forward_backward', self.tello.forward_backward_velocity)
         up_down_velocity = control_action.get('up_down', self.tello.up_down_velocity)
