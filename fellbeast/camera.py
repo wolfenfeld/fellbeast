@@ -34,3 +34,8 @@ class Camera(object):
         resized_frame = self.face_detector.trace_faces(resized_frame)
         return resized_frame
 
+    def release(self):
+        if type(self.drone_camera) == Tello:
+            self.drone_camera.cap.release()
+        else:
+            self.drone_camera.release()

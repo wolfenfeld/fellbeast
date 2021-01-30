@@ -42,21 +42,31 @@ def add_text_to_frame(frame, text, position):
     return frame
 
 
+def add_rectangle_to_frame(frame, bounding_box, color=(255, 0, 0), width=2):
+    top_left, bottom_right = bounding_box.rectangle_coordinates
+    return cv2.rectangle(frame, top_left, bottom_right, color, width)
+
+
+def add_center_of_bounding_box_to_frame(frame, bounding_box, color=(0, 255, 0)):
+    dot_center = bounding_box.bounding_box_center
+    return cv2.circle(frame,
+                      center=(dot_center[1], dot_center[0]),
+                      radius=5,
+                      color=color,
+                      thickness=-1)
+
+
 def annotate_frame(frame, faces_data, control_action):
     for face_data in faces_data.values():
-        top_left, bottom_right = face_data['bounding_box'].rectangle_coordinates
-        frame = cv2.rectangle(frame, top_left, bottom_right, (255, 0, 0), 2)
-        dot_center = face_data['bounding_box'].bounding_box_center
-        frame = cv2.circle(frame,
-                           center=(dot_center[1], dot_center[0]),
-                           radius=5,
-                           color=(0, 255, 0),
-                           thickness=-1)
+
+        frame = add_rectangle_to_frame(frame, face_data['bounding_box'])
+        frame = add_center_of_bounding_box_to_frame(frame, face_data['bounding_box'])
 
         text = f"{face_data['name']} \n" \
                f"Yaw: {control_action['yaw']} \n" \
                f"forward_backward: {control_action['forward_backward']} \n" \
-               f"Area: {face_data['bounding_box'].bounding_box_area} \n" \
-               f"center x,y: {dot_center[1], dot_center[0]}"
-        frame = add_text_to_frame(frame, text=text, position=top_left)
+               f"Area: {face_data['bounding_box'].bounding_box_area} \n"
+        left_top = face_data['bounding_box'].left, face_data['bounding_box'].top
+
+        frame = add_text_to_frame(frame, text=text, position=left_top)
         return frame

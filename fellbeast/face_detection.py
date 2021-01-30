@@ -5,7 +5,7 @@ from fellbeast.object_tracker import BoundingBox
 
 
 class FaceDetector(object):
-    # face_cascade = cv2.CascadeClassifier('/Users/amitwolfenfeld/Development/fellbeast/fellbeast/models/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('/Users/amitwolfenfeld/Development/fellbeast/fellbeast/models/haarcascade_frontalface_default.xml')
     deepface_detector = cv2.dnn.readNetFromCaffe("/Users/amitwolfenfeld/Development/fellbeast/fellbeast/models/deploy.prototxt",
                                                  "/Users/amitwolfenfeld/Development/fellbeast/fellbeast/models/res10_300x300_ssd_iter_140000.caffemodel")
 

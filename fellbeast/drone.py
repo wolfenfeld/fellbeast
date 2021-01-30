@@ -109,33 +109,25 @@ class Drone(object):
     def flip_left(self):
         self.tello.flip_left()
 
-    def get_control_velocity_action(self, object_location, object_size, previous_error):
-        self.logger.info('Getting control actions')
+    def get_control_velocity_action(self, object_location, object_size):
+        self.logger.debug('Getting control actions')
         yaw_error = object_location['x'] - self.camera_screen_width / 2
         up_down_error = (object_location['y'] - self.camera_screen_height) / 2
         forward_backward_error = -(object_size - self.relevant_object_target_size)/\
                                  np.sqrt(self.camera_screen_height * self.camera_screen_width)
 
-        yaw_control = self.yaw_controller.get_action(input_p=yaw_error,
-                                                     input_d=yaw_error - previous_error['yaw'],
-                                                     input_i=0)
+        yaw_control = self.yaw_controller.get_action(error=yaw_error)
         yaw_control = int(np.clip(yaw_control, -self.control_clipping_value, self.control_clipping_value))
 
-        up_down_control = self.up_down_controller.get_action(input_p=up_down_error,
-                                                             input_d=up_down_error - previous_error['up_down'],
-                                                             input_i=0)
+        up_down_control = self.up_down_controller.get_action(error=up_down_error)
         up_down_control = int(np.clip(up_down_control, -self.control_clipping_value, self.control_clipping_value))
 
-        forward_backward_control = self.forward_backward_controller.get_action(
-            input_p=forward_backward_error,
-            input_d=forward_backward_error - previous_error['forward_backward'],
-            input_i=0)
+        forward_backward_control = self.forward_backward_controller.get_action(error=forward_backward_error)
         forward_backward_control = int(np.clip(forward_backward_control,
                                                -self.control_clipping_value, self.control_clipping_value))
 
         control_action = {'yaw': yaw_control, 'up_down': up_down_control, 'forward_backward': forward_backward_control}
-        error = {'yaw': yaw_error, 'up_down': up_down_error, 'forward_backward': forward_backward_error}
-        return control_action, error
+        return control_action
 
     def update_speed(self, control_action: dict):
         if self.mode == 'DEBUG':

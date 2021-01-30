@@ -13,7 +13,7 @@ def display():
     print("Start Displaying")
     cv2.namedWindow("detected_face")
     while True:
-        if q.empty() != True:
+        if not q.empty():
             frame = q.get()
             cv2.imshow("frame1", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -25,10 +25,10 @@ def main():
 
     drone = Drone(known_face_path='../face_db/', mode='DEBUG')
     video_input = './data/videos/test6.mov'
-
+    video_input = 2
     drone.camera = Camera(drone_camera=cv2.VideoCapture(video_input), known_face_path='../face_db')
 
-    follow_person('Tal', drone, frame_q=q)
+    follow_person('Amit', drone, frame_q=q)
     drone.camera.drone_camera.cap.release()
 
 

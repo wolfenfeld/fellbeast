@@ -6,6 +6,16 @@ from fellbeast.bounding_box import BoundingBox
 from fellbeast.configurations import CHECK_FOR_NEW_FACE_FREQUENCY
 from fellbeast.utils import get_closest_coordinate
 
+OPENCV_OBJECT_TRACKERS = {
+    "csrt": cv2.TrackerCSRT_create,
+    "kcf": cv2.TrackerKCF_create,
+    "boosting": cv2.TrackerBoosting_create,
+    "mil": cv2.TrackerMIL_create,
+    "tld": cv2.TrackerTLD_create,
+    "medianflow": cv2.TrackerMedianFlow_create,
+    "mosse": cv2.TrackerMOSSE_create
+}
+
 
 class BaseObjectTracker(object):
     bounding_box = None
@@ -30,17 +40,19 @@ class ObjectTracker(BaseObjectTracker):
 
 
 class MultipleObjectTracker(BaseObjectTracker):
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.tracker = None
         self.lost_tracking = True
         self.bounding_boxes = list()
         self.objects_data = dict()
 
-    def init(self, frame, bounding_boxes: List[BoundingBox]):
+    def init(self, frame, bounding_boxes: List[BoundingBox], tracker_type='medianflow'):
+        self.logger.info('Object Tracker initialized')
         self.tracker = cv2.MultiTracker_create()
         self.bounding_boxes = bounding_boxes
         for bounding_box in bounding_boxes:
-            self.tracker.add(cv2.TrackerCSRT_create(), frame, bounding_box.tracker_format)
+            self.tracker.add(OPENCV_OBJECT_TRACKERS[tracker_type](), frame, bounding_box.tracker_format)
 
     def update_tracker(self, frame):
         success, tracker_bounding_boxes = self.tracker.update(frame)
@@ -55,6 +67,7 @@ class MultipleObjectTracker(BaseObjectTracker):
         scan_for_new_faces = frame_number % CHECK_FOR_NEW_FACE_FREQUENCY == 0
         # Initial face detection
         if self.lost_tracking:
+            self.logger.info('Object Tracker - Detecting Faces')
             # Getting all faces and trying to recognise them
             self.bounding_boxes = camera.face_detector.detect(frame, method='deepface')
 
@@ -77,15 +90,6 @@ class MultipleObjectTracker(BaseObjectTracker):
             # If there are new faces setting the lost_tracking indicator to True
             if len(new_faces_bounding_box) > len(self.bounding_boxes):
                 self.lost_tracking = True
-            # else:
-            #     new_faces_names = list()
-            #     for new_face_bounding_box in new_faces_bounding_box:
-            #         new_faces_names.append(camera.face_recognition.find_face_in_encodings(image=frame,
-            #                                                        face_bounding_box=new_face_bounding_box))
-            #
-            #     if set(new_faces_names) != set([object_data['name'] for object_data in self.objects_data.values()]):
-            #         self.lost_tracking = True
-
 
         # Updating tracker with new frame
         else:
@@ -96,7 +100,7 @@ class MultipleObjectTracker(BaseObjectTracker):
                 'name': self.objects_data[get_closest_coordinate(face_bounding_box.bounding_box_center,
                                                                  old_coordinates)]['name'],
                 'bounding_box': face_bounding_box}
-                             for face_bounding_box in faces_bounding_boxes}
+                for face_bounding_box in faces_bounding_boxes}
 
             self.objects_data = updated_objects_data
             self.lost_tracking = not success
