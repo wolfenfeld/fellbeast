@@ -2,7 +2,6 @@ import time
 import numpy as np
 import logging
 
-
 from djitellopy import Tello
 
 from fellbeast.camera import Camera
@@ -112,8 +111,8 @@ class Drone(object):
     def get_control_velocity_action(self, object_location, object_size):
         self.logger.debug('Getting control actions')
         yaw_error = object_location['x'] - self.camera_screen_width / 2
-        up_down_error = (object_location['y'] - self.camera_screen_height) / 2
-        forward_backward_error = -(object_size - self.relevant_object_target_size)/\
+        up_down_error = object_location['y'] - self.camera_screen_height / 2
+        forward_backward_error = -(object_size - self.relevant_object_target_size) / \
                                  np.sqrt(self.camera_screen_height * self.camera_screen_width)
 
         yaw_control = self.yaw_controller.get_action(error=yaw_error)
@@ -125,14 +124,13 @@ class Drone(object):
         forward_backward_control = self.forward_backward_controller.get_action(error=forward_backward_error)
         forward_backward_control = int(np.clip(forward_backward_control,
                                                -self.control_clipping_value, self.control_clipping_value))
-
         control_action = {'yaw': yaw_control, 'up_down': up_down_control, 'forward_backward': forward_backward_control}
         return control_action
 
     def update_speed(self, control_action: dict):
         if self.mode == 'DEBUG':
             return
-        self.logger.info('Updating drone speed')
+        self.logger.debug('Updating drone speed')
         left_right_velocity = self.tello.left_right_velocity
         forward_backward_velocity = control_action.get('forward_backward', self.tello.forward_backward_velocity)
         up_down_velocity = control_action.get('up_down', self.tello.up_down_velocity)

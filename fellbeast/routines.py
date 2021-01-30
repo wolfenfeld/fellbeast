@@ -54,8 +54,13 @@ def follow_person(person: str, drone: Drone, frame_q: Queue):
         person_data = [face_data for face_data in faces_data.values()
                        if face_data['name'] == person]
         if len(person_data) == 0:
-            continue
-            # add scan room
+            frame_q.put(frame)
+            if drone.mode == 'DEBUG':
+                continue
+            if circular_scan_for_person(person, drone, frame_q, 1):
+                continue
+            else:
+                return
 
         else:
             person_data = person_data[0]
@@ -83,7 +88,7 @@ def circular_scan_for_person(person: str, drone: Drone, frame_q: Queue, number_o
                 detected_person = drone.camera.face_recognition.find_face_in_encodings(frame, bounding_box)
                 if detected_person == person:
                     frame_q.put(frame)
-                    return bounding_box
+                    return True
                 else:
                     drone.rotate_counter_clockwise(angle=STEP_SIZE)
                     frame_q.put(frame)

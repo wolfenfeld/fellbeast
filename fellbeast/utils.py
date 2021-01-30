@@ -65,6 +65,7 @@ def annotate_frame(frame, faces_data, control_action):
         text = f"{face_data['name']} \n" \
                f"Yaw: {control_action['yaw']} \n" \
                f"forward_backward: {control_action['forward_backward']} \n" \
+               f"Vertical: {control_action['up_down']} \n" \
                f"Area: {face_data['bounding_box'].bounding_box_area} \n"
         left_top = face_data['bounding_box'].left, face_data['bounding_box'].top
 
