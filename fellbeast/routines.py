@@ -36,7 +36,7 @@ def track_multiple_faces(drone: Drone):
             break
 
 
-def follow_person(person: str, drone: Drone, frame_q: Queue):
+def follow_person(person: str, drone: Drone, frame_q: Queue, p_input=False):
     drone.logger.info('Initializing Follow Person Routine')
     if person not in drone.camera.face_recognition.encoded_known_faces.keys():
         raise ValueError('Unknown person')
@@ -54,7 +54,10 @@ def follow_person(person: str, drone: Drone, frame_q: Queue):
         person_data = [face_data for face_data in faces_data.values()
                        if face_data['name'] == person]
         if len(person_data) == 0:
-            frame_q.put(frame)
+            if not p_input:
+                frame_q.put(frame)
+            else:
+                p_input.send(frame)
             if drone.mode == 'DEBUG':
                 continue
             if circular_scan_for_person(person, drone, frame_q, 1):
@@ -74,7 +77,10 @@ def follow_person(person: str, drone: Drone, frame_q: Queue):
         drone.update_speed(control_action)
         frame = annotate_frame(frame, faces_data, control_action)
 
-        frame_q.put(frame)
+        if not p_input:
+            frame_q.put(frame)
+        else:
+            p_input.send(frame)
 
 
 def circular_scan_for_person(person: str, drone: Drone, frame_q: Queue, number_of_cycles: int):

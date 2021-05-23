@@ -4,11 +4,18 @@ from djitellopy import Tello
 from fellbeast.face_detection import FaceDetector
 from fellbeast.face_recognition import FaceRecognition
 
+from imutils.video.webcamvideostream import WebcamVideoStream
+
 
 class Camera(object):
 
     def __init__(self, drone_camera, width=640, height=480, known_face_path='./face_db/'):
-        self.drone_camera = drone_camera
+
+        if type(drone_camera) == Tello:
+            self.drone_camera = WebcamVideoStream(src=drone_camera.get_udp_video_address())
+            # self.drone_camera.start()
+        else:
+            self.drone_camera = drone_camera
         self.width = width
         self.height = height
         self.face_detector = FaceDetector()
@@ -19,10 +26,10 @@ class Camera(object):
             frame = self.drone_camera.get_frame_read().frame
             return cv2.resize(frame, (self.width, self.height))
         else:
-            frame = self.drone_camera.read()[1]
-            if frame is None:
-                return None
-            return cv2.resize(frame, (self.width, self.height))
+            camera_read = self.drone_camera.read()
+            if camera_read is None:
+                return []
+            return cv2.resize(camera_read[1], (self.width, self.height))
 
     def get_resized_frame(self):
         frame_read = self.read()

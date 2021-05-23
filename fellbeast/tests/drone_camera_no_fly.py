@@ -25,7 +25,7 @@ def display():
 def main():
     drone = Drone(known_face_path='../face_db/', mode='DEBUG')
     drone.connect(camera=True)
-    drone.wait(7)
+    drone.wait(1)
     for i in range(20):
         print(i)
         test_image = drone.camera.read()
@@ -33,7 +33,7 @@ def main():
             break
         else:
             drone.wait(3)
-    follow_person('Amit', drone, q)
+    follow_person('Amit', drone, q, )
 
 if __name__ == '__main__':
 

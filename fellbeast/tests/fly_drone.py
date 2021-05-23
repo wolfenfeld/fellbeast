@@ -34,10 +34,8 @@ def main():
         else:
             drone.wait(3)
     drone.reset_speed()
-    drone_took_off = drone.takeoff()
-
-    if drone_took_off:
-        follow_person('Amit', drone, q)
+    drone.takeoff()
+    follow_person('Amit', drone, q)
 
 
 if __name__ == '__main__':

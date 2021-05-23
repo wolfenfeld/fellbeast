@@ -54,6 +54,7 @@ class Drone(object):
             self.logger.info('Closing and opening stream')
             self.tello.streamoff()
             self.tello.streamon()
+            self.camera.drone_camera.start()
 
     @property
     def battery_level(self):
@@ -64,18 +65,22 @@ class Drone(object):
         time.sleep(seconds)
 
     def takeoff(self):
-        tries = 5
-        current_try = 0
-        while current_try < tries:
-            result = self.tello.takeoff()
-            if result:
-                self.logger.info('Liftoff successful')
-                return True
-            else:
-                self.logger.info(f'Failed liftoff attempt ({current_try})')
-                current_try += 1
-                self.wait(2)
-        return False
+        self.logger.info('Liftoff Initiated')
+        self.tello.takeoff()
+    # def takeoff(self):
+    #     tries = 1
+    #     current_try = 0
+    #     while current_try < tries:
+    #         result = self.tello.takeoff()
+    #
+    #         if result:
+    #             self.logger.info('Liftoff successful')
+    #             return True
+    #         else:
+    #             self.logger.info(f'Failed liftoff attempt ({current_try})')
+    #             current_try += 1
+    #             self.wait(2)
+    #     return False
 
     def land(self):
         self.logger.info('Landing drone')
